@@ -1,4 +1,5 @@
-# $Id: Makefile,v 1.3 2012/11/27 00:49:42 phil Exp $
+# --------------------------------------------------- -*- Makefile -*- --
+# $Id: Makefile,v 1.4 2012/11/27 00:49:42 phil Exp $
 #
 # @Copyright@
 # 
@@ -55,50 +56,39 @@
 # @Copyright@
 #
 # $Log: Makefile,v $
-# Revision 1.3  2012/11/27 00:49:42  phil
+# Revision 1.4  2012/11/27 00:49:42  phil
 # Copyright Storm for Emerald Boa
 #
-# Revision 1.2  2012/10/04 21:50:52  phil
+# Revision 1.3  2012/10/04 21:50:52  phil
 # Update to rc11
+#
+# Revision 1.2  2012/05/13 19:25:20  phil
+# Updating method for building, updating of modules when you have updated the kernel,
+# documentation
 #
 # Revision 1.1  2012/05/12 06:34:18  phil
 # Start of ZFS on Linux Roll
 #
-include version.mk
-TAR = /bin/tar
-ARCH = $(shell /bin/uname -p)
+
 REDHAT.ROOT = $(CURDIR)/../../
-PATCHFILE = zfs-$(VERSION).patch
+PKGROOT = /opt/zfs
+-include $(ROCKSROOT)/etc/Rules.mk
+include Rules.mk
+
+INITSCRIPTS = zfs-modules 
 
 Makefile: zfs-version.mk
 
 zfs-version.mk:
-	if [ -e ../../zfs-version.mk ]; then /bin/cp ../../zfs-version.mk .; fi 
+	if [ -e ../../zfs-version.mk ]; then /bin/cp ../../zfs-version.mk .; fi
 
-rpm pkg: RPMDIRS buildreqs addledmon
-	gunzip -c $(NAME)-$(VERSION)$(RC)$(RELEASE).$(TARBALL_POSTFIX) | $(TAR) -xf -
-	( 								\
-		cd $(NAME)-$(VERSION)$(RC)$(RELEASE);				\
-		patch -p1 < ../$(PATCHFILE);				\
-		./configure;						\
-		$(MAKE) rpm;						\
-		/bin/cp *$(ARCH).rpm $(REDHAT.ROOT)/RPMS/$(ARCH);	\
-		/bin/cp *src.rpm $(REDHAT.ROOT)/SRPMS;	\
-	)
+build:
+
+install::
+	mkdir -p $(ROOT)/etc/init.d
+	$(INSTALL) -m755  $(INITSCRIPTS)  $(ROOT)/etc/init.d
 	
-RPMDIRS:
-	if [ ! -d $(REDHAT.ROOT)/RPMS/$(ARCH) ]; then \
-		mkdir -p $(REDHAT.ROOT)/RPMS/$(ARCH); fi
-	if [ ! -d $(REDHAT.ROOT)/SRPMS ]; then \
-		mkdir -p $(REDHAT.ROOT)/SRPMS; fi
-
-buildreqs:
-	yum -y install zlib-devel libuuid-devel libblkid-devel libselinux-devel parted lsscsi
-
-addledmon:
-	yumdownloader --enablerepo=base ledmon
-	/bin/cp ledmon*$(ARCH).rpm $(REDHAT.ROOT)/RPMS/$(ARCH);	\
-
-clean:
-	-rm -rf $(NAME)-$(VERSION)$(RC)$(RELEASE)
+clean::
+	rm -f $(NAME).spec.in
 	-rm zfs-version.mk
+

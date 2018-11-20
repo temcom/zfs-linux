@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2012/11/27 00:49:42 phil Exp $
+# $Id: Makefile,v 1.5 2012/11/27 00:48:39 phil Exp $
 #
 # @Copyright@
 # 
@@ -54,51 +54,15 @@
 # 
 # @Copyright@
 #
-# $Log: Makefile,v $
-# Revision 1.3  2012/11/27 00:49:42  phil
-# Copyright Storm for Emerald Boa
-#
-# Revision 1.2  2012/10/04 21:50:52  phil
-# Update to rc11
-#
-# Revision 1.1  2012/05/12 06:34:18  phil
-# Start of ZFS on Linux Roll
-#
-include version.mk
-TAR = /bin/tar
-ARCH = $(shell /bin/uname -p)
+
 REDHAT.ROOT = $(CURDIR)/../../
-PATCHFILE = zfs-$(VERSION).patch
 
-Makefile: zfs-version.mk
+-include $(ROCKSROOT)/etc/Rules.mk
+include Rules.mk
 
-zfs-version.mk:
-	if [ -e ../../zfs-version.mk ]; then /bin/cp ../../zfs-version.mk .; fi 
 
-rpm pkg: RPMDIRS buildreqs addledmon
-	gunzip -c $(NAME)-$(VERSION)$(RC)$(RELEASE).$(TARBALL_POSTFIX) | $(TAR) -xf -
-	( 								\
-		cd $(NAME)-$(VERSION)$(RC)$(RELEASE);				\
-		patch -p1 < ../$(PATCHFILE);				\
-		./configure;						\
-		$(MAKE) rpm;						\
-		/bin/cp *$(ARCH).rpm $(REDHAT.ROOT)/RPMS/$(ARCH);	\
-		/bin/cp *src.rpm $(REDHAT.ROOT)/SRPMS;	\
-	)
-	
-RPMDIRS:
-	if [ ! -d $(REDHAT.ROOT)/RPMS/$(ARCH) ]; then \
-		mkdir -p $(REDHAT.ROOT)/RPMS/$(ARCH); fi
-	if [ ! -d $(REDHAT.ROOT)/SRPMS ]; then \
-		mkdir -p $(REDHAT.ROOT)/SRPMS; fi
-
-buildreqs:
-	yum -y install zlib-devel libuuid-devel libblkid-devel libselinux-devel parted lsscsi
-
-addledmon:
-	yumdownloader --enablerepo=base ledmon
-	/bin/cp ledmon*$(ARCH).rpm $(REDHAT.ROOT)/RPMS/$(ARCH);	\
-
-clean:
-	-rm -rf $(NAME)-$(VERSION)$(RC)$(RELEASE)
-	-rm zfs-version.mk
+build:
+	echo "Nothing to build"
+	echo "" > $(RPM.FILESLIST) 
+install::
+	mkdir -p $(ROOT)/$(PKGROOT)

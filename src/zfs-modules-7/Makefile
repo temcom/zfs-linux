@@ -1,14 +1,14 @@
-#!/bin/bash
 #
-# $Id: zfs-rebuild-module.sh,v 1.2 2012/11/27 00:49:42 phil Exp $
+# $Id: Makefile,v 1.3 2012/11/27 00:48:42 phil Exp $
 #
 # @Copyright@
 # 
 # 				Rocks(r)
 # 		         www.rocksclusters.org
 # 		         version 6.2 (SideWinder)
+# 		         version 7.0 (Manzanita)
 # 
-# Copyright (c) 2000 - 2014 The Regents of the University of California.
+# Copyright (c) 2000 - 2017 The Regents of the University of California.
 # All rights reserved.	
 # 
 # Redistribution and use in source and binary forms, with or without
@@ -56,26 +56,20 @@
 # @Copyright@
 #
 #
-# $Log: zfs-rebuild-module.sh,v $
-# Revision 1.2  2012/11/27 00:49:42  phil
-# Copyright Storm for Emerald Boa
-#
-# Revision 1.1  2012/05/12 06:34:18  phil
-# Start of ZFS on Linux Roll
 #
 
+REDHAT.ROOT     = $(CURDIR)/../../
+-include $(ROCKSROOT)/etc/Rules.mk
+include Rules.mk
 
-ARCH=`uname -p`
-KERNEL_VERSION=`uname -r`
-KERNEL=`uname -r | tr '-' '_'`
-ZFS_HOME=/opt/zfs
-RPMHOME=/root/rpmbuild/RPMS/$ARCH
-NEWRPMS=
+build::
 
-for srpm in $ZFS_HOME/spl-module*.src.rpm $ZFS_HOME/zfs-module*.src.rpm; do
-	echo "=======  Rebuilding: $srpm"
-	rpmbuild --rebuild --define "require_kver $KERNEL_VERSION" $srpm &> $srpm.build.out
-	rpmname=`basename $srpm | cut -d - -f 1,2`
-	# need to force install RPM so that zfs-module will build
-	rpm -ivh --force $RPMHOME/${rpmname}*${KERNEL}.rpm
-done
+
+install::
+	mkdir -p $(ROOT)/$(PKGROOT)
+	(								\
+		for i in $(SCRIPTS); do 					\
+			$(INSTALL) -m 0644 $$i $(ROOT)/$(PKGROOT) ;		\
+		done								\
+	)
+
